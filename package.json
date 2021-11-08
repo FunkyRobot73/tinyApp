@@ -1,7 +1,7 @@
 {
   "name": "tinyApp",
   "version": "1.0.0",
-  "description": "",
+  "description": "tinyApp for Lighthouse Labs W3",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/FunkyRobot73/tinyApp/issues"
   },
-  "homepage": "https://github.com/FunkyRobot73/tinyApp#readme"
+  "homepage": "https://github.com/FunkyRobot73/tinyApp#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
