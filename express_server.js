@@ -8,11 +8,13 @@ const urlDatabase = {
 };
 
 app.get("/", (req, res) => {
-  res.send("Hello!!!");
+  res.send("Hello!!! & Welcome");
 });
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-
+app.get("/urls.json", (req, res) => {
+  res.json(urlDatabase);
+});
