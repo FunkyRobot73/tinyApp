@@ -1,1 +1,4 @@
 node_modules
+*-VBoxSVC-*.log
+*-VBoxHeadless-*.log
+delete.js
