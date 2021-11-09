@@ -54,14 +54,10 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  //const longURL = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.longURL]}// const longURL = ...
   const longURL =  urlDatabase[req.params.shortURL]// const longURL = ...
   
   res.redirect(longURL);
 });
-
-
-//generateRandomString();
 
 
 
