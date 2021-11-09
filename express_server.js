@@ -5,6 +5,10 @@ const PORT = 8080; // default port 8080
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 
+const generateRandomString = function() {
+  return (Math.random().toString(36).substr(2, 6));
+}
+
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -49,9 +53,15 @@ app.post("/urls", (req, res) => {
   res.send("Ok");         // Respond with 'Ok' (we will replace this)
 });
 
-function generateRandomString() {
-  return (Math.random().toString(36).substr(2, 6));
-}
+app.get("/u/:shortURL", (req, res) => {
+  //const longURL = {shortURL: req.params.shortURL, longURL: urlDatabase[req.params.longURL]}// const longURL = ...
+  const longURL =  urlDatabase[req.params.shortURL]// const longURL = ...
+  
+  res.redirect(longURL);
+});
 
-generateRandomString();
+
+//generateRandomString();
+
+
 
