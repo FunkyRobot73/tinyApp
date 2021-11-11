@@ -91,20 +91,25 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 
+app.get('/login', (req, res) => {
+  res.render("/urls")
+});
+  
 app.post("/login", (req, res) => {   //Form: posts to Login
   const userName = req.body.username
+  console.log(userName);
   res.cookie("username", userName);
   res.redirect("/urls")
 });
 
-app.post("/logout", (req, res) => {   //Logout Form
+app.get('/logout', (req, res) => {
+  res.render("/logout")
+});
+
+app.post("/logout", (req, res) => {   //Form: posts to Login
   const userName = req.body.username
-  res.cookie("username", userName);
+  console.log(userName);
+  res.clearCookie("username", userName);
   res.redirect("/urls")
 });
 
-app.get('/clear', function(req, res){
-  res.clearCookie('foo');
-  res.send('cookie cleared');
-  res.redirect("/urls")
-});
