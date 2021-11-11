@@ -14,6 +14,10 @@ const generateRandomString = function() {
   return (Math.random().toString(36).substr(2, 6));
 }
 
+const generateID = function() {
+  return (Math.random().toString(36).substr(2, 3));
+}
+
 
 app.set("view engine", "ejs");
 
@@ -21,11 +25,29 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
+
+///  User Database
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
+
+
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
 app.get("/", (req, res) => {   // "/" after URL returns below
+  console.log(req);
   res.send("You hit End Point '/'    Hello!!! & Welcome");
 });
 
@@ -64,13 +86,6 @@ app.get("/urls/:shortURL", (req, res) => { // Shows Tiny URL
 });
 
 
-app.post("/urls", (req, res) => {
-  //console.log(req.body);  // Log the POST request body to the console
-  const shortURL = generateRandomString()
-  urlDatabase[shortURL] = req.body.longURL// const longURL = ...
-  //res.send("Ok");         // Respond with 'Ok' (we will replace this)
-  res.redirect("/urls/" + shortURL)
-});
 
 app.get("/u/:shortURL", (req, res) => {
   urlDatabase[shortURL] = longURL
@@ -94,7 +109,7 @@ app.post("/urls/:shortURL", (req, res) => {
 app.get('/login', (req, res) => {
   res.render("/urls")
 });
-  
+
 app.post("/login", (req, res) => {   //Form: posts to Login
   const userName = req.body.username
   console.log(userName);
@@ -113,3 +128,41 @@ app.post("/logout", (req, res) => {   //Form: posts to Login
   res.redirect("/urls")
 });
 
+app.get('/register', (req, res) => {
+  console.log("We are here");
+  const username = req.cookies["username"];
+  console.log(username);
+  res.render("urls_register", {username})
+});
+
+app.post('/register', (req, res) => {
+  
+  const email = req.body.email
+  //console.log(email);
+  const password = req.body.pass
+  //console.log(password);
+  const id = generateID();
+
+  users[id] = {
+    "id":id,
+    "email": email,
+    "password": password
+  }
+
+  //users = id
+
+  const userName = req.body.email
+  //console.log(users);
+  res.cookie("username", userName);
+  res.redirect("/urls")
+
+  //res.redirect("/urls_register", {users})
+});
+
+app.post("/urls", (req, res) => {
+  //console.log(req.body);  // Log the POST request body to the console
+  const shortURL = generateRandomString()
+  urlDatabase[shortURL] = req.body.longURL// const longURL = ...
+  //res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  res.redirect("/urls/" + shortURL)
+});
