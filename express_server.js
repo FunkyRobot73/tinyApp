@@ -1,11 +1,14 @@
 const express = require("express");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser')
+
 const app = express();
 const PORT = 8080; // default port 8080
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(morgan('dev'));
+app.use(cookieParser())
 
 const generateRandomString = function() {
   return (Math.random().toString(36).substr(2, 6));
@@ -40,17 +43,23 @@ app.get("/hello", (req, res) => {  // responds with HTML below
 
 app.get("/urls", (req, res) => { //shows main page w/ all objects (database)
   // Create Object in Object
-  const templateVars = { URLS: urlDatabase }
+  const templateVars = { 
+  username: req.cookies["username"],
+  URLS: urlDatabase }
   //console.log(templateVars);
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => { //shows New_URL Page
-  res.render("urls_new");
+  const templateVars = { 
+    username: req.cookies["username"]/* What goes here? */ };
+  res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:shortURL", (req, res) => { // Shows Tiny URL
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]/* What goes here? */ };
+  const templateVars = { 
+    username: req.cookies["username"],
+    shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]/* What goes here? */ };
   res.render("urls_show", templateVars);
 });
 
@@ -74,14 +83,6 @@ app.post("/urls/:shortURL/delete", (req,res) => {
   res.redirect("/urls")
 })
 
-// app.post("/urls/:shortURL/edit", (req,res) => { // Edit Button
-//   const shortURL = req.params.shortURL
-//   const longURL = req.body.longURL
-//   urlDatabase[shortURL] = longURL
-  
-//   res.redirect("/urls/" + shortURL);
-// })
-
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   //console.log(shortURL)
@@ -91,6 +92,19 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/login", (req, res) => {   //Form: posts to Login
-  
-  res.redirect("/urls");
+  const userName = req.body.username
+  res.cookie("username", userName);
+  res.redirect("/urls")
+});
+
+app.post("/logout", (req, res) => {   //Logout Form
+  const userName = req.body.username
+  res.cookie("username", userName);
+  res.redirect("/urls")
+});
+
+app.get('/clear', function(req, res){
+  res.clearCookie('foo');
+  res.send('cookie cleared');
+  res.redirect("/urls")
 });
