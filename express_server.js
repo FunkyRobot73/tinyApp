@@ -48,6 +48,13 @@ const getUserByEMail = function (email) {
   }
 }
 
+const getUserName = function (username) {
+  for (const id in users) {
+    const user = users[id]
+    if (user.username === username) return user
+  }
+}
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -95,8 +102,6 @@ app.get("/urls/:shortURL", (req, res) => { // Shows Tiny URL
   res.render("urls_show", templateVars);
 });
 
-
-
 app.get("/u/:shortURL", (req, res) => {
   urlDatabase[shortURL] = longURL
   res.redirect(longURL);
@@ -116,20 +121,9 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 
-app.get('/login', (req, res) => {
-  res.render("/urls")
-});
 
-app.post("/login", (req, res) => {   //Form: posts to Login
-  const userName = req.body.username
-  console.log(userName);
-  res.cookie("username", userName);
-  res.redirect("/urls")
-});
 
-app.get('/logout', (req, res) => {
-  res.render("/logout")
-});
+
 
 app.post("/logout", (req, res) => {   //Form: posts to Login
   const userName = req.body.username
@@ -138,57 +132,81 @@ app.post("/logout", (req, res) => {   //Form: posts to Login
   res.redirect("/urls")
 });
 
-app.get('/register', (req, res) => {
-  console.log("We are here");
-  const username = req.cookies["username"];
-  console.log(username);
-  res.render("urls_register", { username })
-});
 
+///  GARY Helped
 app.post('/register', (req, res) => {
-
+  
   const email = req.body.email
   const password = req.body.pass
-
+  
   if (!password || !email) {
     res.send("<html><body>You need to fill out both <b><a href=\"/urls\">email & password!! </a></b></body></html>\n ");
     return
   }
-
+  
   const user = getUserByEMail(email)
   if (user) {
     res.send("User Already exists!");
     return
   }
-
+  
   const id = generateID();
   users[id] = { id, email, password }
   res.cookie("user_id", id);
   res.redirect("/urls")
+  
+});
 
+app.get("/login", (req, res) => {
+  const username = req.body.email
+  res.render("urls_login", {username})
+})
+
+app.post("/login", (req, res) => {   //Form: posts to Login
+  const userName = req.body.email
+  console.log(userName);
+  res.cookie("username", userName);
+  res.redirect("/urls")
 });
 
 app.post("/urls", (req, res) => {
-  //console.log(req.body);  // Log the POST request body to the console
   const shortURL = generateRandomString()
-  urlDatabase[shortURL] = req.body.longURL// const longURL = ...
-  //res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  urlDatabase[shortURL] = req.body.longURL
   res.redirect("/urls/" + shortURL)
 });
 
-app.post("/register", (req, res) => {
-  const shortURL = req.params.shortURL
-  delete urlDatabase[shortURL]
-  res.redirect("/urls")
-})
+// app.post("/register", (req, res) => {
+//   const shortURL = req.params.shortURL
+//   delete urlDatabase[shortURL]
+//   res.redirect("/urls")
+// })
 
-app.post("/register", (req, res) => {
-  const shortURL = req.params.shortURL
-  delete urlDatabase[shortURL]
-  res.redirect("/urls")
-})
+
+
+app.get('/register', (req, res) => {
+  const username = req.cookies["username"];
+  res.render("urls_register", { username })
+});
+
+
+
+
+
+
+
+
+
+
 
 //  ******************  DELETE BEFORE SUBMIT
 app.get("/users", (req, res) => { // shows Main as JSON
   res.json(users);
+});
+
+app.get('/login', (req, res) => {
+  res.render("/urls")
+});
+
+app.get('/logout', (req, res) => {
+  res.render("/logout")
 });
