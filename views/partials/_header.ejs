@@ -10,20 +10,21 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <a class="nav-item nav-link" href="/register">Register User</a>
-        <a class="nav-item nav-link" href="/login">Login</a>
+                
       </div>
     </div>
 
     
-    <% 
-      if (username) {
-    %><div><%= username %></div>
+    <% if (user) { %>
+    <div><%= user.email %></div>
     <div><form method="POST" action="/logout"><button>Logout</button></form></div>
-      <% } %> 
-    
-    
-
+       
+    <% } else { %>
+    <div class = "navbar-nav">
+      <a class="nav-item nav-link" href="/register">Register</a> 
+      <a class="nav-item nav-link" href="/login">Login</a>
+    </div>
+    <% } %>
     
   </nav>
 </header>

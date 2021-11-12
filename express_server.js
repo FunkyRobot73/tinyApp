@@ -9,16 +9,6 @@ const PORT = 8080; // default port 8080
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev'));
 app.use(cookieParser())
-
-const generateRandomString = function () {
-  return (Math.random().toString(36).substr(2, 6));
-}
-
-const generateID = function () {
-  return (Math.random().toString(36).substr(2, 3));
-}
-
-
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -40,6 +30,14 @@ const users = {
   }
 }
 
+const generateRandomString = function () {
+  return (Math.random().toString(36).substr(2, 6));
+}
+
+const generateID = function () {
+  return (Math.random().toString(36).substr(2, 3));
+}
+
 ////function (GET USER by EMAIL)
 const getUserByEMail = function (email) {
   for (const id in users) {
@@ -48,17 +46,7 @@ const getUserByEMail = function (email) {
   }
 }
 
-const getUserName = function (username) {
-  for (const id in users) {
-    const user = users[id]
-    if (user.username === username) return user
-  }
-}
 
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
-});
 
 app.get("/", (req, res) => {   // "/" after URL returns below
   console.log(req);
@@ -66,41 +54,63 @@ app.get("/", (req, res) => {   // "/" after URL returns below
 });
 
 
-app.get("/urls.json", (req, res) => { // shows Main as JSON
-  res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {  // responds with HTML below
-  res.send("<html><body>Hello <b>World!</b></body></html>\n");
-});
-
-// BROWSE see all URLs
-// GET /urls
+// /urls ******************************************
 
 app.get("/urls", (req, res) => { //shows main page w/ all objects (database)
   // Create Object in Object
+  const user = users[req.cookies["user_id"]];
   const templateVars = {
-    username: req.cookies["username"],
+    user,
     URLS: urlDatabase
   }
   //console.log(templateVars);
   res.render("urls_index", templateVars);
 });
 
+app.post("/urls", (req, res) => {
+  const shortURL = generateRandomString()
+  urlDatabase[shortURL] = req.body.longURL
+  res.redirect("/urls/" + shortURL)
+});
+
+// /urls/new **********************************************
+
 app.get("/urls/new", (req, res) => { //shows New_URL Page
+  const user = users[req.cookies["user_id"]];
   const templateVars = {
-    username: req.cookies["username"]/* What goes here? */
+    user,
+    URLS: urlDatabase
   };
   res.render("urls_new", templateVars);
 });
 
+// **********************************************
+
 app.get("/urls/:shortURL", (req, res) => { // Shows Tiny URL
+  const user = users[req.cookies["user_id"]];
+  const shortURL = req.params.shortURL
+  const longURL = urlDatabase[shortURL]
+  console.log("===============longURL", longURL);
   const templateVars = {
-    username: req.cookies["username"],
-    shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL]/* What goes here? */
+    user,
+    shortURL,
+    longURL
+    //URLS: urlDatabase
   };
   res.render("urls_show", templateVars);
 });
+
+app.post("/urls/:shortURL", (req, res) => {
+  const user = users[req.cookies["user_id"]];
+  const shortURL = req.params.shortURL
+  const longURL = req.body.longURL
+  urlDatabase[shortURL] = longURL;
+  //console.log("===============longURL", longURL);
+  
+  res.redirect("/urls");
+});
+
+// ************************************************
 
 app.get("/u/:shortURL", (req, res) => {
   urlDatabase[shortURL] = longURL
@@ -113,27 +123,23 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls")
 })
 
-app.post("/urls/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL;
-  //console.log(shortURL)
-  const longURL = req.body.longURL
-  urlDatabase[shortURL] = req.body.longURL;
-  res.redirect("/urls");
+// /logout ************************************************
+
+app.get('/logout', (req, res) => {
+  res.render("/logout")
 });
-
-
-
-
 
 app.post("/logout", (req, res) => {   //Form: posts to Login
   const userName = req.body.username
   console.log(userName);
-  res.clearCookie("username", userName);
+  res.clearCookie("user_id");
   res.redirect("/urls")
 });
 
+// /register ************************************************
 
-///  GARY Helped
+
+///  GARY Helped GARY Helped GARY Helped GARY Helped GARY Helped 
 app.post('/register', (req, res) => {
   
   const email = req.body.email
@@ -152,40 +158,59 @@ app.post('/register', (req, res) => {
   
   const id = generateID();
   users[id] = { id, email, password }
+  // delete cookie
+  //res.clearCookie("username");
   res.cookie("user_id", id);
   res.redirect("/urls")
   
 });
 
+app.get('/register', (req, res) => {
+  const user = users[req.cookies["user_id"]];
+  res.render("urls_register", { user })
+});
+
+// /login ************************************************
+
 app.get("/login", (req, res) => {
-  const username = req.body.email
-  res.render("urls_login", {username})
+  //const username = req.body.email
+  res.render("urls_login", { user: null })
 })
 
 app.post("/login", (req, res) => {   //Form: posts to Login
-  const userName = req.body.email
-  console.log(userName);
-  res.cookie("username", userName);
+  //grabs email & password from login Page
+  const email = req.body.email
+  const password = req.body.password
+  console.log(email + " " + password);
+  
+  if (!password || !email) {
+    res.send("<html><body>You need to fill out both <b><a href=\"/urls\">email & password!! </a></b></body></html>\n ");
+    return
+  }
+  
+  // if email && password doesn't exist ==> try again
+  const user = getUserByEMail(email)
+  console.log(user);
+  
+  if (!user) {
+    res.send("Email does not exist!");
+    return
+  }
+
+  if (user.password !== password) {
+    return res.send("Invalid Login!");
+  }
+  
+  res.cookie("user_id", user.id);
   res.redirect("/urls")
 });
 
-app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString()
-  urlDatabase[shortURL] = req.body.longURL
-  res.redirect("/urls/" + shortURL)
-});
-
-// app.post("/register", (req, res) => {
-//   const shortURL = req.params.shortURL
-//   delete urlDatabase[shortURL]
-//   res.redirect("/urls")
-// })
+// ***************************************************
 
 
 
-app.get('/register', (req, res) => {
-  const username = req.cookies["username"];
-  res.render("urls_register", { username })
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
 });
 
 
@@ -195,18 +220,14 @@ app.get('/register', (req, res) => {
 
 
 
+//  **** ask if these are security risks??
+//  ******************  Possible DELETE BEFORE SUBMIT
 
+app.get("/urls.json", (req, res) => { // shows Main as JSON
+  res.json(urlDatabase);
+});
 
-
-//  ******************  DELETE BEFORE SUBMIT
 app.get("/users", (req, res) => { // shows Main as JSON
   res.json(users);
 });
 
-app.get('/login', (req, res) => {
-  res.render("/urls")
-});
-
-app.get('/logout', (req, res) => {
-  res.render("/logout")
-});
