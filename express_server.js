@@ -205,7 +205,13 @@ app.post("/login", (req, res) => {   //Form: posts to Login
   res.redirect("/urls")
 });
 
-// ***************************************************
+// Intro ***************************************************
+
+app.get("/intro", (req, res) => {
+  res.send("PLease Register or Login Above...");
+});
+
+//************************************************* */
 
 
 
