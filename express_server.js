@@ -58,6 +58,7 @@ app.get("/", (req, res) => {   // "/" after URL returns below
 
 app.get("/urls", (req, res) => { //shows main page w/ all objects (database)
   // Create Object in Object
+
   const user = users[req.cookies["user_id"]];
   const templateVars = {
     user,
