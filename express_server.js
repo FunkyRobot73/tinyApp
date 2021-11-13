@@ -1,7 +1,8 @@
 const express = require("express");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
+//const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
 
 const app = express();
@@ -9,7 +10,17 @@ const PORT = 8080; // default port 8080
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan('dev'));
-app.use(cookieParser())
+//app.use(cookieParser())
+
+app.use(cookieSession({
+  name: 'session',
+  keys: ["adele"],
+
+  // Cookie Options
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
+
+
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -33,8 +44,9 @@ const users = {
   },
   "user2RandomID": {
     id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
+    email: "jimmy@jimmy.com",
+    password: "x",
+    hashedPassword: "$2a$10$ofutHXT033E1QN6ATvM9xebolfpGTWrCNjOPQmHN5IMPaQ9b1NgcS"
   }
 }
 
@@ -82,8 +94,11 @@ app.get("/", (req, res) => {   // "/" after URL returns below
 app.get("/urls", (req, res) => { //shows main page w/ all objects (database)
   // Create Object in Object
 
-   
-  const id = req.cookies["user_id"];
+  console.log("poop");
+  //const id = req.session.user_id; // Totally guessing here *gnort
+  const id = req.session.user_id;
+
+
   
   //console.log(id, "<== This is it!");
   const templateVars = {
@@ -98,7 +113,7 @@ app.post("/urls", (req, res) => {
   const shortURL = generateRandomString()
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
-    userID: req.cookies["user_id"]
+    userID: req.session.user_id
    }
   res.redirect("/urls/" + shortURL)
 });
@@ -106,7 +121,7 @@ app.post("/urls", (req, res) => {
 // /urls/new **********************************************
 
 app.get("/urls/new", (req, res) => { //shows New_URL Page
-  const user = users[req.cookies["user_id"]];
+  const user = users[req.session.user_id];
   const templateVars = {
     user,
     URLS: urlDatabase
@@ -117,7 +132,7 @@ app.get("/urls/new", (req, res) => { //shows New_URL Page
 // **********************************************
 
 app.get("/urls/:shortURL", (req, res) => { // Shows Tiny URL
-  const user = users[req.cookies["user_id"]];
+  const user = users[req.session.user_id];
   const shortURL = req.params.shortURL
   const longURL = urlDatabase[shortURL].longURL
   //console.log("===============longURL", longURL);
@@ -131,7 +146,7 @@ app.get("/urls/:shortURL", (req, res) => { // Shows Tiny URL
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  const userID = users[req.cookies["user_id"]];
+  const userID = users[req.session.user_id];
   const shortURL = req.params.shortURL
   const longURL = req.body.longURL
   urlDatabase[shortURL] = { longURL, userID:userID.id };
@@ -145,7 +160,7 @@ app.post("/urls/:shortURL", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   //console.log("What is this??????");
   const shortURL = req.params.shortURL
-  const id = req.cookies["user_id"]
+  const id = req.session.user_id
   const usersURL = urlsForUser(id)
 
   // This is usersURL=> {
@@ -178,7 +193,8 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 app.post("/logout", (req, res) => {   //Form: posts to Login
   const userName = req.body.username
   //console.log(userName);
-  res.clearCookie("user_id");
+  //res.clearCookie("user_id");
+  req.session = null  // or...  req.session.id = null  for just the id!
   res.redirect("/urls")
 });
 
@@ -211,13 +227,14 @@ app.post('/register', (req, res) => {
   users[id] = { id, email, hashedPassword }
   // delete cookie
   //res.clearCookie("username");
-  res.cookie("user_id", id);
+  //res.cookie("user_id", id);   *gnort
+  req.session.user_id = id
   res.redirect("/urls")
   
 });
 
 app.get('/register', (req, res) => {
-  const user = users[req.cookies["user_id"]];
+  const user = users[req.session.user_id];
   res.render("urls_register", { user })
 });
 
@@ -234,7 +251,7 @@ app.post("/login", (req, res) => {   //Form: posts to Login
   const email = req.body.email
   const password = req.body.password
   console.log(email + " " + password);
-  
+  console.log(bcrypt.hashSync(password, 10));
   //bcrypt.compareSync(password, hashedPassword);
   //console.log("Encrypted???", bcrypt.compareSync(password, hashedPassword));
   
@@ -245,7 +262,7 @@ app.post("/login", (req, res) => {   //Form: posts to Login
   
   // if email && password doesn't exist ==> try again
   const user = getUserByEMail(email)
-  console.log("userPassword ===>" + user.hashedPassword + "password======>" + password);
+  //console.log("userPassword ===>" + user.hashedPassword + "password======>" + password);
   
   if (!user) {
     res.send("Email does not exist!");
@@ -258,8 +275,8 @@ app.post("/login", (req, res) => {   //Form: posts to Login
     return res.send("Invalid Login!");
   }
   
-
-  res.cookie("user_id", user.id);
+  req.session.user_id = user.id;
+  //res.cookie("user_id", user.id);
   res.redirect("/urls")
 });
 
