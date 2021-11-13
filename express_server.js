@@ -80,7 +80,8 @@ app.get("/", (req, res) => {   // "/" after URL returns below
 
 app.get("/urls", (req, res) => { //shows main page w/ all objects (database)
   // Create Object in Object
-  
+
+   
   const id = req.cookies["user_id"];
   
   console.log(id, "<== This is it!");
@@ -141,9 +142,29 @@ app.post("/urls/:shortURL", (req, res) => {
 // ************************************************
 
 app.get("/u/:shortURL", (req, res) => {
-  
-  res.redirect(urlDatabase[req.params.shortURL]);
+  //console.log("What is this??????");
+  const shortURL = req.params.shortURL
+  const id = req.cookies["user_id"]
+  const usersURL = urlsForUser(id)
+
+  // This is usersURL=> {
+  //   '0gqg56': { longURL: 'http://www.thephotobooth.ca', userID: 's92ffp' }
+  // }
+  // This is shortURL======> 0gqg56
+  // This is ID===> s92ffp
+
+  const longURL = usersURL[shortURL].longURL
+  // console.log("This is usersURL=>", usersURL);
+  // console.log("This is shortURL======>", shortURL);
+  // console.log("This is ID===>", id);
+  // console.log(longURL);
+  // return res.end("Hello!")
+  res.redirect(longURL);
 });
+
+
+
+
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   const shortURL = req.params.shortURL
