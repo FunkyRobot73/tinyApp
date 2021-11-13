@@ -1,7 +1,8 @@
 const express = require("express");
 const morgan = require("morgan");
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser')
+const cookieParser = require('cookie-parser');
+const bcrypt = require('bcryptjs');
 
 const app = express();
 const PORT = 8080; // default port 8080
@@ -48,14 +49,14 @@ const generateID = function() {
 
 const urlsForUser = function(id) {
   //URLs of Current UserID
-  console.log(id, "<-----URLS for USERid");
+  //console.log(id, "<-----URLS for USERid");
   const userURLObject = {};
   for (let shortURLs in urlDatabase) {
     //console.log(shortURLs);
     if (urlDatabase[shortURLs].userID === id) {
       userURLObject[shortURLs] = urlDatabase[shortURLs]
     }
-    console.log(userURLObject);
+    //console.log(userURLObject);
   }
   return userURLObject;
 };
@@ -71,7 +72,7 @@ const getUserByEMail = function (email) {
 
 
 app.get("/", (req, res) => {   // "/" after URL returns below
-  console.log(req);
+  //console.log(req);
   res.send("You hit End Point '/'    Hello!!! & Welcome");
 });
 
@@ -84,12 +85,12 @@ app.get("/urls", (req, res) => { //shows main page w/ all objects (database)
    
   const id = req.cookies["user_id"];
   
-  console.log(id, "<== This is it!");
+  //console.log(id, "<== This is it!");
   const templateVars = {
     user: id,
     URLS: urlsForUser(id)
   }
-  console.log(templateVars, "<=====VARS");
+  //console.log(templateVars, "<=====VARS");
   res.render("urls_index", templateVars);
 });
 
@@ -119,7 +120,7 @@ app.get("/urls/:shortURL", (req, res) => { // Shows Tiny URL
   const user = users[req.cookies["user_id"]];
   const shortURL = req.params.shortURL
   const longURL = urlDatabase[shortURL].longURL
-  console.log("===============longURL", longURL);
+  //console.log("===============longURL", longURL);
   const templateVars = {
     user,
     shortURL,
@@ -135,7 +136,7 @@ app.post("/urls/:shortURL", (req, res) => {
   const longURL = req.body.longURL
   urlDatabase[shortURL] = { longURL, userID:userID.id };
   //console.log("===============longURL", longURL);
-  console.log(urlDatabase, "<---Database");
+  //console.log(urlDatabase, "<---Database");
   res.redirect("/urls");
 });
 
@@ -174,13 +175,9 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 
 // /logout ************************************************
 
-app.get('/logout', (req, res) => {
-  res.render("/logout")
-});
-
 app.post("/logout", (req, res) => {   //Form: posts to Login
   const userName = req.body.username
-  console.log(userName);
+  //console.log(userName);
   res.clearCookie("user_id");
   res.redirect("/urls")
 });
@@ -194,6 +191,11 @@ app.post('/register', (req, res) => {
   const email = req.body.email
   const password = req.body.pass
   
+  const hashedPassword = bcrypt.hashSync(password, 10);
+  console.log("Hashed===>", hashedPassword);
+  console.log(bcrypt.compareSync(password, hashedPassword));
+
+  
   if (!password || !email) {
     res.send("<html><body>You need to fill out both <b><a href=\"/urls\">email & password!! </a></b></body></html>\n ");
     return
@@ -206,7 +208,7 @@ app.post('/register', (req, res) => {
   }
   
   const id = generateID();
-  users[id] = { id, email, password }
+  users[id] = { id, email, hashedPassword }
   // delete cookie
   //res.clearCookie("username");
   res.cookie("user_id", id);
@@ -233,6 +235,9 @@ app.post("/login", (req, res) => {   //Form: posts to Login
   const password = req.body.password
   console.log(email + " " + password);
   
+  //bcrypt.compareSync(password, hashedPassword);
+  //console.log("Encrypted???", bcrypt.compareSync(password, hashedPassword));
+  
   if (!password || !email) {
     res.send("<html><body>You need to fill out both <b><a href=\"/urls\">email & password!! </a></b></body></html>\n ");
     return
@@ -240,17 +245,20 @@ app.post("/login", (req, res) => {   //Form: posts to Login
   
   // if email && password doesn't exist ==> try again
   const user = getUserByEMail(email)
-  console.log(user);
+  console.log("userPassword ===>" + user.hashedPassword + "password======>" + password);
   
   if (!user) {
     res.send("Email does not exist!");
     return
   }
 
-  if (user.password !== password) {
+  
+
+  if (!bcrypt.compareSync(password, user.hashedPassword)) {
     return res.send("Invalid Login!");
   }
   
+
   res.cookie("user_id", user.id);
   res.redirect("/urls")
 });
