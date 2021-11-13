@@ -25,8 +25,8 @@ const urlDatabase = {
 
 ///  User Database
 const users = {
-  "userRandomID": {
-    id: "userRandomID",
+  "aJ48lW": {
+    id: "aJ48lW",
     email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
@@ -37,13 +37,21 @@ const users = {
   }
 }
 
-const generateRandomString = function () {
+
+const generateRandomString = function() {
   return (Math.random().toString(36).substr(2, 6));
 }
 
-const generateID = function () {
+const generateID = function() {
   return (Math.random().toString(36).substr(2, 6));
 }
+
+const urlsForUser = function(id) {
+  //URLs of Current UserID
+  for (let url in URLS[url].longURL) {
+    console.log(url);
+  }
+};
 
 ////function (GET USER by EMAIL)
 const getUserByEMail = function (email) {
@@ -188,6 +196,7 @@ app.get("/login", (req, res) => {
   res.render("urls_login", { user: null })
 })
 
+
 app.post("/login", (req, res) => {   //Form: posts to Login
   //grabs email & password from login Page
   const email = req.body.email
@@ -219,6 +228,10 @@ app.post("/login", (req, res) => {   //Form: posts to Login
 // Intro ***************************************************
 
 app.get("/intro", (req, res) => {
+  res.send("PLease Register or Login Above...");
+});
+
+app.get("/urls/:id", (req, res) => {
   res.send("PLease Register or Login Above...");
 });
 
