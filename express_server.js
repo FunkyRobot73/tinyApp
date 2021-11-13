@@ -28,7 +28,7 @@ const users = {
   "aJ48lW": {
     id: "aJ48lW",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "1"
   },
   "user2RandomID": {
     id: "user2RandomID",
@@ -48,9 +48,16 @@ const generateID = function() {
 
 const urlsForUser = function(id) {
   //URLs of Current UserID
-  for (let url in URLS[url].longURL) {
-    console.log(url);
+  console.log(id, "<-----URLS for USERid");
+  const userURLObject = {};
+  for (let shortURLs in urlDatabase) {
+    //console.log(shortURLs);
+    if (urlDatabase[shortURLs].userID === id) {
+      userURLObject[shortURLs] = urlDatabase[shortURLs]
+    }
+    console.log(userURLObject);
   }
+  return userURLObject;
 };
 
 ////function (GET USER by EMAIL)
@@ -73,13 +80,15 @@ app.get("/", (req, res) => {   // "/" after URL returns below
 
 app.get("/urls", (req, res) => { //shows main page w/ all objects (database)
   // Create Object in Object
-
-  const user = users[req.cookies["user_id"]];
+  
+  const id = req.cookies["user_id"];
+  
+  console.log(id, "<== This is it!");
   const templateVars = {
-    user,
-    URLS: urlDatabase
+    user: id,
+    URLS: urlsForUser(id)
   }
-  //console.log(templateVars);
+  console.log(templateVars, "<=====VARS");
   res.render("urls_index", templateVars);
 });
 
@@ -108,7 +117,7 @@ app.get("/urls/new", (req, res) => { //shows New_URL Page
 app.get("/urls/:shortURL", (req, res) => { // Shows Tiny URL
   const user = users[req.cookies["user_id"]];
   const shortURL = req.params.shortURL
-  const longURL = urlDatabase[shortURL]
+  const longURL = urlDatabase[shortURL].longURL
   console.log("===============longURL", longURL);
   const templateVars = {
     user,
@@ -120,12 +129,12 @@ app.get("/urls/:shortURL", (req, res) => { // Shows Tiny URL
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  const user = users[req.cookies["user_id"]];
+  const userID = users[req.cookies["user_id"]];
   const shortURL = req.params.shortURL
   const longURL = req.body.longURL
-  urlDatabase[shortURL] = longURL;
+  urlDatabase[shortURL] = { longURL, userID:userID.id };
   //console.log("===============longURL", longURL);
-  
+  console.log(urlDatabase, "<---Database");
   res.redirect("/urls");
 });
 
