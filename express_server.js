@@ -12,9 +12,16 @@ app.use(cookieParser())
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  b6UTxQ: {
+      longURL: "https://www.tsn.ca",
+      userID: "aJ48lW"
+  },
+  i3BoGr: {
+      longURL: "https://www.google.ca",
+      userID: "aJ48lW"
+  }
 };
+
 
 ///  User Database
 const users = {
@@ -35,7 +42,7 @@ const generateRandomString = function () {
 }
 
 const generateID = function () {
-  return (Math.random().toString(36).substr(2, 3));
+  return (Math.random().toString(36).substr(2, 6));
 }
 
 ////function (GET USER by EMAIL)
@@ -70,7 +77,10 @@ app.get("/urls", (req, res) => { //shows main page w/ all objects (database)
 
 app.post("/urls", (req, res) => {
   const shortURL = generateRandomString()
-  urlDatabase[shortURL] = req.body.longURL
+  urlDatabase[shortURL] = {
+    longURL: req.body.longURL,
+    userID: req.cookies["user_id"]
+   }
   res.redirect("/urls/" + shortURL)
 });
 
