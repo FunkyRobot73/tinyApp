@@ -40,12 +40,13 @@ const users = {
   "aJ48lW": {
     id: "aJ48lW",
     email: "user@example.com",
-    password: "1"
+    
+    hashedPassword: "$2a$10$ofutHXT033E1QN6ATvM9xebolfpGTWrCNjOPQmHN5IMPaQ9b1NgcS"
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "jimmy@jimmy.com",
-    password: "x",
+    
     hashedPassword: "$2a$10$ofutHXT033E1QN6ATvM9xebolfpGTWrCNjOPQmHN5IMPaQ9b1NgcS"
   }
 }
@@ -60,23 +61,21 @@ const generateID = function() {
 }
 
 const urlsForUser = function(id) {
-  //URLs of Current UserID
-  //console.log(id, "<-----URLS for USERid");
-  const userURLObject = {};
-  for (let shortURLs in urlDatabase) {
-    //console.log(shortURLs);
-    if (urlDatabase[shortURLs].userID === id) {
-      userURLObject[shortURLs] = urlDatabase[shortURLs]
-    }
-    //console.log(userURLObject);
+const userURLObject = {};
+
+for (let shortURLs in urlDatabase) {
+  if (urlDatabase[shortURLs].userID === id) {
+    userURLObject[shortURLs] = urlDatabase[shortURLs]
   }
+}
   return userURLObject;
 };
 
 ////function (GET USER by EMAIL)
-const getUserByEMail = function (email) {
+
+const getUserByEMail = function (email, database) {
   for (const id in users) {
-    const user = users[id]
+    const user = users[id];
     if (user.email === email) return user
   }
 }
@@ -97,12 +96,12 @@ app.get("/urls", (req, res) => { //shows main page w/ all objects (database)
   console.log("poop");
   //const id = req.session.user_id; // Totally guessing here *gnort
   const id = req.session.user_id;
-
+  const user = users[req.session.user_id];
 
   
   //console.log(id, "<== This is it!");
   const templateVars = {
-    user: id,
+    user,
     URLS: urlsForUser(id)
   }
   //console.log(templateVars, "<=====VARS");
@@ -133,8 +132,8 @@ app.get("/urls/new", (req, res) => { //shows New_URL Page
 
 app.get("/urls/:shortURL", (req, res) => { // Shows Tiny URL
   const user = users[req.session.user_id];
-  const shortURL = req.params.shortURL
-  const longURL = urlDatabase[shortURL].longURL
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL].longURL;
   //console.log("===============longURL", longURL);
   const templateVars = {
     user,
@@ -147,8 +146,8 @@ app.get("/urls/:shortURL", (req, res) => { // Shows Tiny URL
 
 app.post("/urls/:shortURL", (req, res) => {
   const userID = users[req.session.user_id];
-  const shortURL = req.params.shortURL
-  const longURL = req.body.longURL
+  const shortURL = req.params.shortURL;
+  const longURL = req.body.longURL;
   urlDatabase[shortURL] = { longURL, userID:userID.id };
   //console.log("===============longURL", longURL);
   //console.log(urlDatabase, "<---Database");
@@ -159,43 +158,26 @@ app.post("/urls/:shortURL", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   //console.log("What is this??????");
-  const shortURL = req.params.shortURL
-  const id = req.session.user_id
-  const usersURL = urlsForUser(id)
+  const shortURL = req.params.shortURL;
+  const id = req.session.user_id;
+  const usersURL = urlsForUser(id);
+  const longURL = usersURL[shortURL].longURL;
 
-  // This is usersURL=> {
-  //   '0gqg56': { longURL: 'http://www.thephotobooth.ca', userID: 's92ffp' }
-  // }
-  // This is shortURL======> 0gqg56
-  // This is ID===> s92ffp
-
-  const longURL = usersURL[shortURL].longURL
-  // console.log("This is usersURL=>", usersURL);
-  // console.log("This is shortURL======>", shortURL);
-  // console.log("This is ID===>", id);
-  // console.log(longURL);
-  // return res.end("Hello!")
   res.redirect(longURL);
 });
 
-
-
-
-
 app.post("/urls/:shortURL/delete", (req, res) => {
-  const shortURL = req.params.shortURL
-  delete urlDatabase[shortURL]
-  res.redirect("/urls")
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");
 })
 
 // /logout ************************************************
 
 app.post("/logout", (req, res) => {   //Form: posts to Login
-  const userName = req.body.username
-  //console.log(userName);
-  //res.clearCookie("user_id");
-  req.session = null  // or...  req.session.id = null  for just the id!
-  res.redirect("/urls")
+  //const userName = req.body.username
+  req.session = null;  // or...  req.session.id = null  for just the id!
+  res.redirect("/urls");
 });
 
 // /register ************************************************
@@ -204,13 +186,11 @@ app.post("/logout", (req, res) => {   //Form: posts to Login
 ///  GARY Helped GARY Helped GARY Helped GARY Helped GARY Helped 
 app.post('/register', (req, res) => {
   
-  const email = req.body.email
-  const password = req.body.pass
-  
+  const email = req.body.email;
+  const password = req.body.pass;
   const hashedPassword = bcrypt.hashSync(password, 10);
   console.log("Hashed===>", hashedPassword);
   console.log(bcrypt.compareSync(password, hashedPassword));
-
   
   if (!password || !email) {
     res.send("<html><body>You need to fill out both <b><a href=\"/urls\">email & password!! </a></b></body></html>\n ");
@@ -228,28 +208,28 @@ app.post('/register', (req, res) => {
   // delete cookie
   //res.clearCookie("username");
   //res.cookie("user_id", id);   *gnort
-  req.session.user_id = id
-  res.redirect("/urls")
+  req.session.user_id = id;
+  res.redirect("/urls");
   
 });
 
 app.get('/register', (req, res) => {
   const user = users[req.session.user_id];
-  res.render("urls_register", { user })
+  res.render("urls_register", { user });
 });
 
 // /login ************************************************
 
 app.get("/login", (req, res) => {
   //const username = req.body.email
-  res.render("urls_login", { user: null })
+  res.render("urls_login", { user: null });
 })
 
 
 app.post("/login", (req, res) => {   //Form: posts to Login
   //grabs email & password from login Page
-  const email = req.body.email
-  const password = req.body.password
+  const email = req.body.email;
+  const password = req.body.password;
   console.log(email + " " + password);
   console.log(bcrypt.hashSync(password, 10));
   //bcrypt.compareSync(password, hashedPassword);
@@ -261,7 +241,7 @@ app.post("/login", (req, res) => {   //Form: posts to Login
   }
   
   // if email && password doesn't exist ==> try again
-  const user = getUserByEMail(email)
+  const user = getUserByEMail(email);
   //console.log("userPassword ===>" + user.hashedPassword + "password======>" + password);
   
   if (!user) {
@@ -277,7 +257,7 @@ app.post("/login", (req, res) => {   //Form: posts to Login
   
   req.session.user_id = user.id;
   //res.cookie("user_id", user.id);
-  res.redirect("/urls")
+  res.redirect("/urls");
 });
 
 // Intro ***************************************************
@@ -305,7 +285,7 @@ app.listen(PORT, () => {
 
 
 
-//  **** ask if these are security risks??
+//  **** ask Mentor if these are security risks??
 //  ******************  Possible DELETE BEFORE SUBMIT
 
 app.get("/urls.json", (req, res) => { // shows Main as JSON
