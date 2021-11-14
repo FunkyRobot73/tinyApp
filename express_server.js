@@ -1,5 +1,4 @@
 const express = require("express");
-const morgan = require("morgan");
 const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
@@ -9,7 +8,6 @@ const app = express();
 const PORT = 8080; // default port 8080
 
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(morgan('dev'));
 app.set("view engine", "ejs");
 
 app.use(cookieSession({
@@ -71,7 +69,7 @@ for (let shortURLs in urlDatabase) {
 
 
 app.get("/", (req, res) => {   // "/" after URL returns below
-  //console.log(req);
+  
   res.send("You hit End Point '/'    Hello!!! & Welcome");
 });
 
@@ -81,7 +79,7 @@ app.get("/", (req, res) => {   // "/" after URL returns below
 app.get("/urls", (req, res) => { //shows main page w/ all objects (database)
   // Create Object in Object
 
-  console.log("poop");
+  
   const id = req.session.user_id;
   const user = users[req.session.user_id];
   const templateVars = {
@@ -174,8 +172,8 @@ app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.pass;
   const hashedPassword = bcrypt.hashSync(password, 10);
-  console.log("Hashed===>", hashedPassword);
-  console.log(bcrypt.compareSync(password, hashedPassword));
+  //console.log("Hashed===>", hashedPassword);
+  //console.log(bcrypt.compareSync(password, hashedPassword));
   
   if (!password || !email) {
     res.send("<html><body>You need to fill out both <b><a href=\"/urls\">email & password!! </a></b></body></html>\n ");
@@ -213,8 +211,8 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {   //Form: posts to Login
   const email = req.body.email;
   const password = req.body.password;
-  console.log(email + " " + password);
-  console.log(bcrypt.hashSync(password, 10));
+  //console.log(email + " " + password);
+  //console.log(bcrypt.hashSync(password, 10));
   
   if (!password || !email) {
     res.send("<html><body>You need to fill out both <b><a href=\"/urls\">email & password!! </a></b></body></html>\n ");
