@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 //const cookieParser = require('cookie-parser');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcryptjs');
+const { getUserByEMail } = require("./helpers");
 
 const app = express();
 const PORT = 8080; // default port 8080
@@ -73,12 +74,7 @@ for (let shortURLs in urlDatabase) {
 
 ////function (GET USER by EMAIL)
 
-const getUserByEMail = function (email, database) {
-  for (const id in users) {
-    const user = users[id];
-    if (user.email === email) return user
-  }
-}
+
 
 
 
@@ -197,7 +193,7 @@ app.post('/register', (req, res) => {
     return
   }
   
-  const user = getUserByEMail(email)
+  const user = getUserByEMail(email, users)
   if (user) {
     res.send("User Already exists!");
     return
@@ -241,7 +237,7 @@ app.post("/login", (req, res) => {   //Form: posts to Login
   }
   
   // if email && password doesn't exist ==> try again
-  const user = getUserByEMail(email);
+  const user = getUserByEMail(email, users);
   //console.log("userPassword ===>" + user.hashedPassword + "password======>" + password);
   
   if (!user) {
@@ -296,4 +292,3 @@ app.get("/users", (req, res) => { // shows Main as JSON
   res.json(users);
 });
 
-//Nov.12 6:25pm
