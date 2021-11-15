@@ -16,7 +16,7 @@ app.use(cookieSession({
 
   // Cookie Options
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
-}))
+}));
 
 
 const urlDatabase = {
@@ -45,23 +45,23 @@ const users = {
     
     hashedPassword: "$2a$10$ofutHXT033E1QN6ATvM9xebolfpGTWrCNjOPQmHN5IMPaQ9b1NgcS"
   }
-}
+};
 
 
 const generateRandomString = function() {
   return (Math.random().toString(36).substr(2, 6));
-}
+};
 
 const generateID = function() {
   return (Math.random().toString(36).substr(2, 6));
-}
+};
 
 const urlsForUser = function(id) {
 const userURLObject = {};
 
 for (let shortURLs in urlDatabase) {
   if (urlDatabase[shortURLs].userID === id) {
-    userURLObject[shortURLs] = urlDatabase[shortURLs]
+    userURLObject[shortURLs] = urlDatabase[shortURLs];
   }
 }
   return userURLObject;
@@ -85,19 +85,19 @@ app.get("/urls", (req, res) => { //shows main page w/ all objects (database)
   const templateVars = {
     user,
     URLS: urlsForUser(id)
-  }
+  };
 
   res.render("urls_index", templateVars);
 });
 
 app.post("/urls", (req, res) => {
-  const shortURL = generateRandomString()
+  const shortURL = generateRandomString();
   urlDatabase[shortURL] = {
     longURL: req.body.longURL,
     userID: req.session.user_id
-   }
+   };
 
-   res.redirect("/urls/" + shortURL)
+   res.redirect("/urls/" + shortURL);
 });
 
 // /urls/new **********************************************
@@ -153,7 +153,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[shortURL];
 
   res.redirect("/urls");
-})
+});
 
 // /logout ************************************************
 
@@ -177,17 +177,17 @@ app.post('/register', (req, res) => {
   
   if (!password || !email) {
     res.send("<html><body>You need to fill out both <b><a href=\"/urls\">email & password!! </a></b></body></html>\n ");
-    return
+    return;
   }
   
-  const user = getUserByEMail(email, users)
+  const user = getUserByEMail(email, users);
   if (user) {
     res.send("User Already exists!");
-    return
+    return;
   }
   
   const id = generateID();
-  users[id] = { id, email, hashedPassword }
+  users[id] = { id, email, hashedPassword };
 
   req.session.user_id = id;
   res.redirect("/urls");
@@ -205,7 +205,7 @@ app.get('/register', (req, res) => {
 app.get("/login", (req, res) => {
 
   res.render("urls_login", { user: null });
-})
+});
 
 
 app.post("/login", (req, res) => {   //Form: posts to Login
@@ -216,14 +216,14 @@ app.post("/login", (req, res) => {   //Form: posts to Login
   
   if (!password || !email) {
     res.send("<html><body>You need to fill out both <b><a href=\"/urls\">email & password!! </a></b></body></html>\n ");
-    return
+    return;
   }
   
   const user = getUserByEMail(email, users);
   
   if (!user) {
     res.send("Email does not exist!");
-    return
+    return;
   }
 
   if (!bcrypt.compareSync(password, user.hashedPassword)) {
