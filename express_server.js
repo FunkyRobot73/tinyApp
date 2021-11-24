@@ -52,9 +52,6 @@ const generateRandomString = function() {
   return (Math.random().toString(36).substr(2, 6));
 };
 
-const generateID = function() {
-  return (Math.random().toString(36).substr(2, 6));
-};
 
 const urlsForUser = function(id) {
 const userURLObject = {};
@@ -206,7 +203,7 @@ app.post('/register', (req, res) => {
     return;
   }
   
-  const id = generateID();
+  const id = generateRandomString();
   users[id] = { id, email, hashedPassword };
 
   req.session.user_id = id;
