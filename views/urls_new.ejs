@@ -14,6 +14,8 @@
 
     <%- include('partials/_header') %>
 
+    <% if (user) { %>
+
     <main style="margin: 1em;">
       <h3>Create TinyURL</h3>
 
@@ -25,6 +27,13 @@
           
         </div>
       </form>
+
+      <% } else { %>
+      
+        <h4>&nbsp;</h4>
+        <h4>&nbsp;&nbsp;&nbsp;Welcome to TinyApp... Please Register or Log In above.&nbsp;&nbsp;   ⬆️</h4>
+  
+      <% } %>
 
       
     </main>

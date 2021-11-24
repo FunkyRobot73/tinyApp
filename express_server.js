@@ -70,7 +70,12 @@ for (let shortURLs in urlDatabase) {
 
 app.get("/", (req, res) => {   // "/" after URL returns below
   
-  res.send("You hit End Point '/'    Hello!!! & Welcome");
+  const cookie = req.session;
+  if (cookie.user_id) {
+    res.redirect('/urls');
+  } else {
+    res.redirect('/login');
+  }
 });
 
 
@@ -116,6 +121,7 @@ app.get("/urls/new", (req, res) => { //shows New_URL Page
 
 app.get("/urls/:shortURL", (req, res) => { // Shows Tiny URL
   const user = users[req.session.user_id];
+  const cookie = req.session;
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL].longURL;
   const templateVars = {
@@ -125,7 +131,21 @@ app.get("/urls/:shortURL", (req, res) => { // Shows Tiny URL
     //URLS: urlDatabase
   };
 
-  res.render("urls_show", templateVars);
+  // Only Show URL if correct Logged in User!!!
+
+  if (!cookie.user_id) {
+    // Not logged in
+    res.redirect('/login');
+  } else if (cookie.user_id === urlDatabase[shortURL].userID) {
+    // Logged in and url belongs to user
+    res.render('urls_show', templateVars);
+  } else {
+    // Url does not belong to user, return them to their list of URLS with an error message
+ 
+    
+    res.redirect('/login');
+  }
+
 });
 
 app.post("/urls/:shortURL", (req, res) => {
