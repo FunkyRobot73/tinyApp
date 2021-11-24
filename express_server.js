@@ -271,22 +271,3 @@ app.get("/urls/:id", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
-
-
-
-
-
-
-
-
-//  **** ask Mentor if these are security risks??
-//  ******************  Possible DELETE BEFORE SUBMIT
-
-app.get("/urls.json", (req, res) => { // shows Main as JSON
-  res.json(urlDatabase);
-});
-
-app.get("/users", (req, res) => { // shows Main as JSON
-  res.json(users);
-});
-
