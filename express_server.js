@@ -47,7 +47,7 @@ const users = {
   }
 };
 
-
+// Generate Random string for UserID & ShortURL
 const generateRandomString = function() {
   return (Math.random().toString(36).substr(2, 6));
 };
@@ -56,7 +56,7 @@ const generateRandomString = function() {
 const urlsForUser = function(id) {
 const userURLObject = {};
 
-for (let shortURLs in urlDatabase) {
+for (const shortURLs in urlDatabase) {
   if (urlDatabase[shortURLs].userID === id) {
     userURLObject[shortURLs] = urlDatabase[shortURLs];
   }
