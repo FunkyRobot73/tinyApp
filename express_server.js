@@ -137,9 +137,6 @@ app.get("/urls/:shortURL", (req, res) => { // Shows Tiny URL
     // Logged in and url belongs to user
     res.render('urls_show', templateVars);
   } else {
-    // Url does not belong to user, return them to their list of URLS with an error message
- 
-    
     res.redirect('/login');
   }
 
@@ -183,15 +180,12 @@ app.post("/logout", (req, res) => {   //Form: posts to Login
 // /register ************************************************
 
 
-///  GARY Helped GARY Helped GARY Helped GARY Helped GARY Helped 
 app.post('/register', (req, res) => {
   
   const email = req.body.email;
   const password = req.body.pass;
   const hashedPassword = bcrypt.hashSync(password, 10);
-  //console.log("Hashed===>", hashedPassword);
-  //console.log(bcrypt.compareSync(password, hashedPassword));
-  
+    
   if (!password || !email) {
     res.send("<html><body>You need to fill out both <b><a href=\"/urls\">email & password!! </a></b></body></html>\n ");
     return;
@@ -228,9 +222,7 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {   //Form: posts to Login
   const email = req.body.email;
   const password = req.body.password;
-  //console.log(email + " " + password);
-  //console.log(bcrypt.hashSync(password, 10));
-  
+    
   if (!password || !email) {
     res.send("<html><body>You need to fill out both <b><a href=\"/urls\">email & password!! </a></b></body></html>\n ");
     return;
